@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LIANDRI Replay Uploader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="/main.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="top" data-tauri-drag-region>
+        <img class="mark" src="logo.png" alt="" width="34" height="42" data-tauri-drag-region />
+        <div class="brand" data-tauri-drag-region>
+          <div class="brand-row" data-tauri-drag-region>
+            <span class="word">LTS REPLAY</span>
+            <span class="rule"></span>
+            <span class="product">UPLOADER</span>
+          </div>
+          <p class="tagline" data-tauri-drag-region>LIANDRI TACTICAL SERVICE</p>
+        </div>
+        <div class="dots">
+          <button type="button" id="dot-min" class="dot amber" title="Minimize" aria-label="Minimize"></button>
+          <button type="button" id="dot-max" class="dot green" title="Maximize" aria-label="Maximize"></button>
+          <button type="button" id="dot-close" class="dot pink" title="Hide to tray" aria-label="Close"></button>
+        </div>
+      </header>
+
+      <section class="panel account" id="account-panel">
+        <div class="panel-head">
+          <h2><span class="sym" aria-hidden="true">⌁</span> ACCOUNT</h2>
+          <p class="panel-note" id="account-note">Same account as the website</p>
+        </div>
+        <form id="gate" class="account-guest" autocomplete="on">
+          <input id="server-url" type="url" autocomplete="url" spellcheck="false" placeholder="Server URL (https://…)" />
+          <input id="username" type="text" autocomplete="username" spellcheck="false" placeholder="Email" />
+          <input id="password" type="password" autocomplete="current-password" placeholder="Password" />
+          <button type="submit" id="login-btn" class="text-action">SIGN IN</button>
+        </form>
+        <div id="account-user" class="account-user" hidden>
+          <p class="account-name" id="account-name">—</p>
+          <button type="button" id="logout-btn" class="text-action">SIGN OUT</button>
+        </div>
+        <p class="error" id="form-error"></p>
+      </section>
+
+      <section class="panel folder">
+        <div class="panel-head">
+          <h2><span class="sym" aria-hidden="true">⌁</span> WATCHED FOLDER</h2>
+          <button type="button" id="watch-change" class="text-action">CHANGE</button>
+        </div>
+        <p class="folder-path" id="watch-path" title="Choose a replay folder">No folder selected</p>
+        <div class="folder-opts">
+          <label class="chk" title="Start with Windows">
+            <input id="autostart" type="checkbox" />
+            <span class="box" aria-hidden="true"></span>
+          </label>
+          <span class="opt-label">Auto-start with Windows</span>
+          <span id="watch-status" class="text-action auto-flag">WATCHING</span>
+        </div>
+      </section>
+
+      <section class="panel uploads">
+        <div class="panel-head">
+          <h2><span class="sym bars" aria-hidden="true">≡</span> CURRENT UPLOADS</h2>
+          <p class="panel-note" id="upload-count">0 Active · 0 Queued</p>
+        </div>
+        <p class="banner error-only" id="banner"></p>
+        <div class="queue-shell">
+          <div id="queue" class="queue"></div>
+        </div>
+        <button type="button" id="upload-now-btn" class="text-action upload-file">UPLOAD FILE</button>
+      </section>
+
+      <footer class="foot">
+        <nav>
+          <button type="button" id="privacy-btn" class="foot-link">Privacy</button>
+          <span class="sep" aria-hidden="true">·</span>
+          <button type="button" id="help-btn" class="foot-link">Help</button>
+          <span class="sep" aria-hidden="true">·</span>
+          <button type="button" id="website-btn" class="foot-link">Website</button>
+        </nav>
+        <p class="version">v0.6a</p>
+      </footer>
+    </div>
+
+    <dialog id="help-dialog">
+      <form method="dialog" class="modal">
+        <h3>Help</h3>
+        <p>Pick a folder with <strong>CHANGE</strong>. A file is queued after its size stays still for a few seconds.</p>
+        <p>Phases: uploading → assembling → converting on the site. <strong>Uploaded · available on the website</strong> means it is published.</p>
+        <p>Close hides the app in the tray. Quit from the tray menu. Duplicates already on the site are skipped silently.</p>
+        <div class="row end"><button type="submit" class="btn-modal">Close</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="privacy-dialog">
+      <form method="dialog" class="modal">
+        <h3>Privacy</h3>
+        <p>The password is used once to sign in and is not saved. The session token is kept in Windows Credential Manager.</p>
+        <p>Filenames are sent as they appear on disk.</p>
+        <div class="row end"><button type="submit" class="btn-modal">Close</button></div>
+      </form>
+    </dialog>
+  </body>
+</html>

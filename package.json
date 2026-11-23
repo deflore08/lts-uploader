@@ -1,0 +1,19 @@
+{
+  "name": "lts-uploader",
+  "private": true,
+  "version": "0.6.0",
+  "description": "Автозагрузчик реплеев LTS Replay",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:win": "tauri build",
+    "build:linux": "tauri build --bundles appimage",
+    "build:installer": "tauri build --bundles msi,nsis",
+    "release:linux": "powershell -ExecutionPolicy Bypass -File scripts/build-linux-appimage.ps1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
