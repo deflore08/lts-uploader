@@ -1,5 +1,5 @@
 const invoke = window.__TAURI__?.core?.invoke;
-let serverBase = "";
+const SERVER = "https://replay.liandri.ru";
 const ACTIVE = [
   "initializing",
   "uploading",
@@ -122,15 +122,9 @@ function speedOf(job) {
   return { bps };
 }
 
-function apiRoot() {
-  return serverBase.trim().replace(/\/$/, "");
-}
-
 function videoLink(job) {
-  const base = apiRoot();
-  if (!base) return null;
-  if (job.slug) return `${base}/v/${encodeURIComponent(job.slug)}`;
-  if (job.videoId) return `${base}/watch/${encodeURIComponent(job.videoId)}`;
+  if (job.slug) return `${SERVER}/v/${encodeURIComponent(job.slug)}`;
+  if (job.videoId) return `${SERVER}/watch/${encodeURIComponent(job.videoId)}`;
   return null;
 }
 
@@ -217,21 +211,15 @@ function detailLine(job) {
   return { text: tag };
 }
 
-function renderAccount(auth, config) {
+function renderAccount(auth) {
   const signedIn = Boolean(auth.loggedIn);
   $("gate").hidden = signedIn;
   $("account-user").hidden = !signedIn;
-  $("account-note").textContent = signedIn ? "Connected" : "Same account as on the server";
+  $("account-note").textContent = signedIn ? "Connected" : "Same account as the website";
   if (signedIn) {
     $("account-name").textContent = auth.username || "—";
-  } else {
-    if (document.activeElement !== $("username") && auth.username) {
-      $("username").value = auth.username;
-    }
-    const savedUrl = config?.serverUrl?.trim() || "";
-    if (document.activeElement !== $("server-url") && savedUrl) {
-      $("server-url").value = savedUrl;
-    }
+  } else if (document.activeElement !== $("username") && auth.username) {
+    $("username").value = auth.username;
   }
 }
 
@@ -355,8 +343,7 @@ function renderQueue(jobs) {
 
 function render(snap) {
   const jobs = snap.jobs || [];
-  serverBase = snap.config?.serverUrl || "";
-  renderAccount(snap.auth || {}, snap.config || {});
+  renderAccount(snap.auth || {});
   renderFolder(snap);
   renderQueue(jobs);
 }
@@ -416,21 +403,13 @@ function init() {
   on("logout-btn", () => call("logout").then(refresh));
   on("privacy-btn", () => openDialog("privacy-dialog"));
   on("help-btn", () => openDialog("help-dialog"));
-  on("website-btn", () => {
-    const url = apiRoot();
-    if (!url) {
-      setError("Server URL is not configured");
-      return;
-    }
-    call("open_external", { url });
-  });
+  on("website-btn", () => call("open_external", { url: SERVER }));
 
   $("gate").addEventListener("submit", (event) => {
     event.preventDefault();
     call("login", {
       username: $("username").value,
       password: $("password").value,
-      serverUrl: $("server-url").value,
     })
       .then(() => {
         $("password").value = "";

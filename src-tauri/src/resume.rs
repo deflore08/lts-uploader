@@ -19,15 +19,12 @@ pub async fn recover_active_uploads(app: &AppHandle) {
     };
     let folder = state::lock(&state.config).watch_folder.clone();
     let root = folder_path(&folder);
-    let Ok(base) = state::api_base(&state) else {
-        finish_ready(app, &state).await;
-        return;
-    };
+    let base = crate::config::SERVER_URL;
 
     state::set_activity(&state, "resume", "fetching active sessions");
     state::publish(app);
 
-    let active = match upload::fetch_active(&state.http, &base, &session.token).await {
+    let active = match upload::fetch_active(&state.http, base, &session.token).await {
         Ok(items) => items,
         Err(err) => {
             state::push_log(&state, format!("resume: {err}"));
@@ -104,7 +101,7 @@ pub async fn recover_active_uploads(app: &AppHandle) {
     }
 
     let mut synced = 0usize;
-    match upload::fetch_processing(&state.http, &base, &session.token, &session.username).await {
+    match upload::fetch_processing(&state.http, base, &session.token, &session.username).await {
         Ok(items) => synced += ingest_processing_list(app, &state, root.as_deref(), &items).await,
         Err(err) => state::push_log(&state, format!("processing: {err}")),
     }

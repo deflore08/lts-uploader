@@ -66,12 +66,8 @@ async fn restore_session(app: &AppHandle) {
             return;
         }
     };
-    let Ok(base) = state::api_base(&state) else {
-        state.watcher_ready.store(true, Ordering::Release);
-        state::publish(app);
-        return;
-    };
-    match upload::me(&state.http, &base, &token).await {
+    let base = crate::config::SERVER_URL;
+    match upload::me(&state.http, base, &token).await {
         Ok(user) => {
             *state::lock(&state.session) = Some(state::Session {
                 username: user.username,
@@ -338,8 +334,8 @@ async fn ingest_stable_batch(
             batch_len,
         );
         state::publish(app);
-        let base = state::api_base(&state).map_err(|err| err.to_string())?;
-        match upload::check_duplicates_on_server(&state.http, &base, &session.token, &to_check).await
+        let base = crate::config::SERVER_URL;
+        match upload::check_duplicates_on_server(&state.http, base, &session.token, &to_check).await
         {
             Ok(duplicates) => {
                 let mut enqueued = 0usize;
@@ -422,7 +418,7 @@ async fn upload_once(app: &AppHandle) -> Result<(), String> {
         format!("{} — {}", job.filename, job.status),
     );
     state::publish(app);
-    let base = state::api_base(&state).map_err(|err| err.to_string())?;
+    let base = crate::config::SERVER_URL.to_string();
     if job.upload_id.is_none() {
         if let Ok(meta) = std::fs::metadata(&job.path) {
             job.size = meta.len();
@@ -594,7 +590,7 @@ async fn poll_once(app: &AppHandle) -> Result<(), String> {
     if jobs.is_empty() {
         return Ok(());
     }
-    let base = state::api_base(&state).map_err(|err| err.to_string())?;
+    let base = crate::config::SERVER_URL.to_string();
     let mut changed = false;
     for job in jobs {
         let Some(upload_id) = job.upload_id.clone() else {

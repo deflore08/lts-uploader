@@ -8,7 +8,7 @@ use tauri::image::Image;
 use tauri::{AppHandle, Emitter, Manager};
 use tokio::sync::Notify;
 
-use crate::config::{self, AppConfig};
+use crate::config::AppConfig;
 use crate::queue::{Job, Queue};
 use crate::upload::FingerprintSet;
 use crate::watcher::WatchHub;
@@ -157,10 +157,6 @@ pub fn skip_path(state: &AppState, path: &str) {
 
 pub fn should_skip_path(state: &AppState, path: &str) -> bool {
     lock(&state.skip_paths).contains(path)
-}
-
-pub fn api_base(state: &AppState) -> Result<String, String> {
-    config::api_base(&lock(&state.config))
 }
 
 pub fn snapshot(state: &AppState) -> Snapshot {

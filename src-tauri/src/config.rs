@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+pub const SERVER_URL: &str = "https://replay.liandri.ru";
 pub const STABILITY_SECS: u64 = 8;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,7 +10,6 @@ pub const STABILITY_SECS: u64 = 8;
 pub struct AppConfig {
     pub username: String,
     pub watch_folder: String,
-    pub server_url: String,
 }
 
 impl Default for AppConfig {
@@ -17,23 +17,8 @@ impl Default for AppConfig {
         Self {
             username: String::new(),
             watch_folder: String::new(),
-            server_url: String::new(),
         }
     }
-}
-
-/// Base URL from config, or compile-time `LTS_DEFAULT_SERVER_URL` when config is empty (release builds only).
-pub fn api_base(cfg: &AppConfig) -> Result<String, String> {
-    let raw = cfg.server_url.trim();
-    let raw = if raw.is_empty() {
-        option_env!("LTS_DEFAULT_SERVER_URL").unwrap_or("")
-    } else {
-        raw
-    };
-    if raw.is_empty() {
-        return Err("укажите адрес сервера (https://…)".into());
-    }
-    normalize_base_url(raw)
 }
 
 impl AppConfig {
@@ -89,8 +74,8 @@ mod tests {
             "http://127.0.0.1:8080"
         );
         assert_eq!(
-            normalize_base_url("https://replay.example").unwrap(),
-            "https://replay.example"
+            normalize_base_url(SERVER_URL).unwrap(),
+            SERVER_URL
         );
     }
 

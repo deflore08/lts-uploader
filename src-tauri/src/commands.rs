@@ -15,32 +15,22 @@ pub fn snapshot(app: AppHandle) -> Snapshot {
 }
 
 #[tauri::command]
-pub async fn login(
-    app: AppHandle,
-    username: String,
-    password: String,
-    server_url: String,
-) -> Result<AuthView, String> {
+pub async fn login(app: AppHandle, username: String, password: String) -> Result<AuthView, String> {
     let username = username.trim().to_string();
-    let server_url = server_url.trim().to_string();
     if username.is_empty() || password.is_empty() {
         return Err("username and password are required".into());
     }
-    if server_url.is_empty() {
-        return Err("server URL is required".into());
-    }
     let state = app.state::<AppState>();
-    let base = crate::config::normalize_base_url(&server_url)?;
-    {
-        let mut cfg = state::lock(&state.config);
-        cfg.username = username.clone();
-        cfg.server_url = base.clone();
-        cfg.save(&state.data_dir)?;
-    }
-    let result = upload::login(&state.http, &base, &username, &password)
+    let base = crate::config::SERVER_URL;
+    let result = upload::login(&state.http, base, &username, &password)
         .await
         .map_err(human_error)?;
     secrets::save_token(&state.data_dir, &username, &result.token)?;
+    {
+        let mut cfg = state::lock(&state.config);
+        cfg.username = username.clone();
+        cfg.save(&state.data_dir)?;
+    }
     let role = result.user.role.clone();
     let token = result.token.clone();
     *state::lock(&state.session) = Some(state::Session {
@@ -140,10 +130,10 @@ pub async fn upload_file_now(app: AppHandle) -> Result<String, String> {
     if let Some(session) = session {
         set_activity(&state, "check_server", "check-duplicates: 1 файл");
         state::publish(&app);
-        let base = state::api_base(&state)?;
+        let base = crate::config::SERVER_URL;
         match upload::check_duplicates_on_server(
             &state.http,
-            &base,
+            base,
             &session.token,
             &[upload::DuplicateProbe {
                 source_fingerprint: fp.clone(),
@@ -238,7 +228,7 @@ pub async fn retry_job(app: AppHandle, id: i64) -> Result<(), String> {
     };
     if let Some(upload_id) = old_upload_id {
         let session = state::lock(&state.session).clone();
-        let base = state::api_base(&state)?;
+        let base = crate::config::SERVER_URL;
         let http = state.http.clone();
         if let Some(session) = session {
             let _ = upload::cancel_upload(&http, &base, &session.token, &upload_id).await;
@@ -291,7 +281,7 @@ pub async fn cancel_job(app: AppHandle, id: i64) -> Result<(), String> {
     }
     if let Some(upload_id) = job.upload_id.clone() {
         let session = state::lock(&state.session).clone();
-        let base = state::api_base(&state)?;
+        let base = crate::config::SERVER_URL;
         if let Some(session) = session {
             if let Err(err) =
                 upload::cancel_upload(&state.http, &base, &session.token, &upload_id).await

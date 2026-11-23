@@ -2,17 +2,15 @@
 
 ## Network
 
-The desktop app uses the **server base URL you enter at sign-in** (saved in local `config.json`). All HTTP calls go to that host under `/api/…`. Review `src-tauri/src/upload.rs` and `worker.rs` for paths.
+The release desktop app talks to a fixed API host compiled into the client (`src-tauri/src/config.rs`, front-end in `src/main.js`). Review `upload.rs` and `worker.rs` for HTTP paths under `/api/…`.
 
-Optional release builds may set a default host at **compile time** via `LTS_DEFAULT_SERVER_URL` (not stored in this repository).
-
-The `lts-upload` CLI accepts `--base` for each run.
+The `lts-upload` CLI accepts `--base` per run (development tool).
 
 ## Secrets
 
 - Password: sent only to `POST /api/auth/login`, not stored on disk.
 - Session token: Windows Credential Manager (`src-tauri/src/secrets.rs`).
-- `config.json` holds username, watch folder, and server URL only (no password, no token).
+- `config.json` holds username and watch folder only.
 
 ## Reporting issues
 
